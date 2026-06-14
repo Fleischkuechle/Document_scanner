@@ -3,10 +3,18 @@ import numpy as np
 from imutils.perspective import four_point_transform
 import pytesseract
 
-cap = cv2.VideoCapture(0 + cv2.CAP_DSHOW)
+cap = cv2.VideoCapture(1 + cv2.CAP_DSHOW)
 
-pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+# pytesseract.pytesseract.tesseract_cmd = (
+#     "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+# )
+import os
 
+# Damit wird der Pfad dynamisch auf den tesseract_ocr Ordner im aktuellen Verzeichnis gesetzt
+pytesseract.pytesseract.tesseract_cmd = os.path.join(
+    os.getcwd(), "tesseract_ocr", "tesseract.exe"
+)
+# pytesseract.pytesseract.tesseract_cmd = r"D:\132\tesseract_ocr\tesseract.exe"
 count = 0
 scale = 0.5
 
@@ -58,7 +66,9 @@ def center_text(image, text):
 
 while True:
 
-    _, frame = cap.read()
+    ret, frame = cap.read()
+    if not ret or frame is None:
+        continue
     frame = cv2.rotate(frame, cv2.ROTATE_180)
     frame_copy = frame.copy()
 
@@ -67,26 +77,38 @@ while True:
     cv2.imshow("input", cv2.resize(frame, (int(scale * WIDTH), int(scale * HEIGHT))))
 
     warped = four_point_transform(frame_copy, document_contour.reshape(4, 2))
-    cv2.imshow("Warped", cv2.resize(warped, (int(scale * warped.shape[1]), int(scale * warped.shape[0]))))
+    cv2.imshow(
+        "Warped",
+        cv2.resize(
+            warped, (int(scale * warped.shape[1]), int(scale * warped.shape[0]))
+        ),
+    )
 
     processed = image_processing(warped)
-    processed = processed[10:processed.shape[0] - 10, 10:processed.shape[1] - 10]
-    cv2.imshow("Processed", cv2.resize(processed, (int(scale * processed.shape[1]),
-                                                   int(scale * processed.shape[0]))))
+    processed = processed[10 : processed.shape[0] - 10, 10 : processed.shape[1] - 10]
+    cv2.imshow(
+        "Processed",
+        cv2.resize(
+            processed,
+            (int(scale * processed.shape[1]), int(scale * processed.shape[0])),
+        ),
+    )
 
     pressed_key = cv2.waitKey(1) & 0xFF
     if pressed_key == 27:
         break
 
-    elif pressed_key == ord('s'):
+    elif pressed_key == ord("s"):
         cv2.imwrite("output/scanned_" + str(count) + ".jpg", processed)
         count += 1
 
         center_text(frame, "Scan Saved")
-        cv2.imshow("input", cv2.resize(frame, (int(scale * WIDTH), int(scale * HEIGHT))))
+        cv2.imshow(
+            "input", cv2.resize(frame, (int(scale * WIDTH), int(scale * HEIGHT)))
+        )
         cv2.waitKey(500)
 
-    elif pressed_key == ord('o'):
+    elif pressed_key == ord("o"):
         file = open("output/recognized_" + str(count - 1) + ".txt", "w")
         ocr_text = pytesseract.image_to_string(warped)
         # print(ocr_text)
@@ -94,7 +116,9 @@ while True:
         file.close()
 
         center_text(frame, "Text Saved")
-        cv2.imshow("input", cv2.resize(frame, (int(scale * WIDTH), int(scale * HEIGHT))))
+        cv2.imshow(
+            "input", cv2.resize(frame, (int(scale * WIDTH), int(scale * HEIGHT)))
+        )
         cv2.waitKey(500)
 
 cv2.destroyAllWindows()

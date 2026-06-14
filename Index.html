@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Python-Scanner</title>
+</head>
+
+<body>
+    <video id="webcam" autoplay playsinline style="width: 100%; max-width: 640px;"></video>
+    <br>
+    <button onclick="sendScan()" style="padding: 15px 30px; font-size: 18px;">Scan & OCR</button>
+    <p id="result">Ergebnis:</p>
+
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+    <script>
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('canvas');
+
+        // Kamera starten
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => { console.error("Fehler beim Zugriff auf Kamera: ", err); });
+
+        async function sendScan() {
+            const ctx = canvas.getContext('2d');
+            // Zeichne das aktuelle Bild vom Video auf das (versteckte) Canvas
+            ctx.drawImage(video, 0, 0, 640, 480);
+
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append("file", blob, "scan.jpg");
+
+                document.getElementById('result').innerText = "Verarbeite...";
+
+                try {
+                    const response = await fetch('http://localhost:8000/process-scan', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    document.getElementById('result').innerText = "OCR Ergebnis: " + data.text;
+                } catch (error) {
+                    document.getElementById('result').innerText = "Fehler bei der Verbindung zum Server.";
+                    console.error(error);
+                }
+            }, 'image/jpeg');
+        }
+    </script>
+</body>
+
+</html>

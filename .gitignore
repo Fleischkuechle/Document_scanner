@@ -1,0 +1,49 @@
+# --- Python basics ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Distribution / packaging ---
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# --- Installer logs ---
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --- Unit test / coverage ---
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+pytest_cache/
+.pytest_cache/
+nosetests.xml
+coverage.xml
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- MyPy / Pyright
+tesseract_ocr/
+/tesseract-ocr/
+Parts/
+output/
